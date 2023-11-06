@@ -8,19 +8,15 @@ from PIL import ImageTk
 import db_renji_qi as qi
 
 
-class TicTacToneGUI:
+class ClientGui:
     def __init__(self):
         """
         窗口初始化
         """
         self.root = None
-        self.select_window = tk.Tk()
-        self.selection = tk.IntVar()
         """
         服务器还是客户端 以及ip和端口数据的存储
         """
-        self.is_sever = 1
-        self.is_client = 2
         self.host = None
         self.port = None
 
@@ -45,8 +41,6 @@ class TicTacToneGUI:
 
         self.game_state = threading.Event()
         self.game_state.set()
-        self.th_sever_send = None
-        self.th_sever_receive = None
 
         self.th_client_send = None
         self.th_client_receive = None
@@ -59,28 +53,16 @@ class TicTacToneGUI:
         self.start_button = None
         self.start_button_count = 0
 
-        self.select_pack()
-        self.select_window.resizable(False, False)
+        self.create_client_gui()
 
-        TicTacToneGUI.center_window(self.select_window)
 
-        # self.thread = threading.Thread(target=self.main_threading)  # 或者使用带超时时间的recv
-        # self.thread.start()
-
-        self.select_window.mainloop()
-
-    # @staticmethod
-    # def close_window():
-    #     # 终止所有进程
-    #     os._exit(0)
-
-    def create_gui(self):
+    def create_client_gui(self):
         self.root = tk.Tk()
         self.root.title('Tic_Tac_Toe')
         self.board_pack()
         self.manu_pack()
         self.root.resizable(False, False)
-        TicTacToneGUI.center_window(self.root)
+        ClientGui.center_window(self.root)
         self.root.mainloop()
 
     @staticmethod
@@ -97,10 +79,6 @@ class TicTacToneGUI:
     """
     The name of function which ends with '_click' deals with click event
     """
-
-    def select_button_click(self):
-        self.select_window.destroy()
-        self.create_gui()
 
     def chess_click(self, row, col, is_change_chess=False):
         if self.start_button['state'] == 'disabled':
@@ -152,35 +130,21 @@ class TicTacToneGUI:
             return
 
     def connect_click(self):
-        if self.selection.get() == self.is_client:
-            host = self.host.get()
-            port = int(self.port.get())
-            self.creat_client(host, port)
-
-        else:
-            port = int(self.port.get())
-            self.creat_sever(port)
+        host = self.host.get()
+        port = int(self.port.get())
+        self.creat_client(host, port)
         self.connect_button['state'] = tk.DISABLED
         self.start_button['state'] = tk.NORMAL
 
     def start_click(self):
         if self.start_button_count == 0:
-            if self.selection.get() == self.is_sever:
-                self.th_sever_send = threading.Thread(target=self.sever_sending)
-                self.th_sever_receive = threading.Thread(target=self.sever_receiving)
-                self.th_sever_send.setDaemon(True)
-                self.th_sever_receive.setDaemon(True)
-                self.th_sever_send.start()
-                self.th_sever_receive.start()
-                self.who_go_first_sever()
-            else:
-                self.th_client_send = threading.Thread(target=self.client_sending)
-                self.th_client_receive = threading.Thread(target=self.client_receiving)
-                self.th_client_send.setDaemon(True)
-                self.th_client_receive.setDaemon(True)
-                self.th_client_send.start()
-                self.th_client_receive.start()
-                self.who_go_first_client()
+            self.th_client_send = threading.Thread(target=self.client_sending)
+            self.th_client_receive = threading.Thread(target=self.client_receiving)
+            self.th_client_send.setDaemon(True)
+            self.th_client_receive.setDaemon(True)
+            self.th_client_send.start()
+            self.th_client_receive.start()
+            self.who_go_first_client()
         else:
             if self.game_state.is_set():
                 tk.messagebox.showinfo(title='Warning', message="Current game is going on!")
@@ -192,63 +156,21 @@ class TicTacToneGUI:
                     self.buttons[i][j].config(image=self.board_image)
 
             self.game_state.set()
-
-            if self.selection.get() == self.is_sever:
-                self.who_go_first_sever()
-            else:
-                self.who_go_first_client()
+            self.who_go_first_client()
         self.start_button_count += 1
 
     """
     threading start
     """
 
-    def creat_sever(self, port):
-        """
-        using IPV4 connection and UDP to communicate
-        """
-        self.sockobj = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.sockobj.bind(('', port))  # 在使用socket.bind()方法时，你需要传入一个元组作为参数，包含主机地址和端口号。
-        self.sockobj.listen(1)
-
-        self.connection, self.address = self.sockobj.accept()
-        print('Server connected by', self.address)
-
     def creat_client(self, host, port):
         self.sockobj = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sockobj.connect((host, port))
         self.connect_button.config(text='Connect Successfully!')
-        # th_client_receive = threading.Thread(target=self.client_receiving)
-        # th_client_receive.start()
 
     """
     communication between sever and client
     """
-
-    def sever_receiving(self):
-        while True:
-            try:
-                data = self.connection.recv(1024).decode('utf-8')  # read next line on client socket
-            except socket.error:
-                sys.exit()
-            data = eval(data)
-            if data[-1] == 'ok':
-                self.turn = int(data[0])
-                self.turn_flag = True
-
-            else:
-                print(f'Client {data}')
-                self.is_your_turn = True
-                self.chess_click(*data, True)
-
-    def sever_sending(self):
-        while True:
-            if self.is_send_data:
-                position = str(self.position)
-                sending = position.encode('utf-8')
-                self.connection.send(sending)
-                self.is_send_data = False
-                self.is_your_turn = False
 
     def client_receiving(self):
         while True:
@@ -276,38 +198,20 @@ class TicTacToneGUI:
                 self.is_send_data = False
                 self.is_your_turn = False
 
-    def who_go_first_sever(self):
-        if self.selection.get() == self.is_sever:
-            if not self.turn_flag:
-                self.turn = randint(1, 2)
-                self.connection.send(str((1 if self.turn == 2 else 2, 'ok')).encode('utf-8'))
-                self.turn_flag = True
-
-            self.current_player = 1 if self.turn == 1 else 2
-            self.is_your_turn = True if self.turn == 1 else False
-
-            # data = self.connection.recv(1024).decode('utf-8')  # read next line on client socket
-            # if data == 'start':
-            if self.turn == 1:
-                tk.messagebox.showinfo(title='Game Start', message='You go first!')
-            else:
-                tk.messagebox.showinfo(title='Game Start', message='You go second!')
-
     def who_go_first_client(self):
-        if self.selection.get() == self.is_client:
-            if not self.turn_flag:
-                self.turn = randint(1, 2)
-                self.sockobj.send(str((1 if self.turn == 2 else 2, 'ok')).encode('utf-8'))
-                self.turn_flag = True
+        if not self.turn_flag:
+            self.turn = randint(1, 2)
+            self.sockobj.send(str((1 if self.turn == 2 else 2, 'ok')).encode('utf-8'))
+            self.turn_flag = True
 
-            # self.turn = int(self.sockobj.recv(1024).decode('utf-8'))
-            # print(self.turn)
-            self.current_player = 1 if self.turn == 1 else 2
-            self.is_your_turn = True if self.turn == 1 else False
-            if self.turn == 1:
-                tk.messagebox.showinfo(title='Game Start', message='You go first!')
-            else:
-                tk.messagebox.showinfo(title='Game Start', message='You go second!')
+        # self.turn = int(self.sockobj.recv(1024).decode('utf-8'))
+        # print(self.turn)
+        self.current_player = 1 if self.turn == 1 else 2
+        self.is_your_turn = True if self.turn == 1 else False
+        if self.turn == 1:
+            tk.messagebox.showinfo(title='Game Start', message='You go first!')
+        else:
+            tk.messagebox.showinfo(title='Game Start', message='You go second!')
 
     def board_pack(self):
         board_frame = tk.Frame(self.root)
@@ -331,14 +235,12 @@ class TicTacToneGUI:
 
     def manu_pack(self):
         manu_frame = tk.Frame(self.root)
+        ip_label = tk.Label(manu_frame, text="Sever's ip address:", justify=tk.RIGHT)
+        ip_label.pack(pady=10)
 
-        if self.selection.get() == self.is_client:
-            ip_label = tk.Label(manu_frame, text="Sever's ip address:", justify=tk.RIGHT)
-            ip_label.pack(pady=10)
-
-            self.host = tk.StringVar(value='127.0.0.1')
-            host_box = tk.Entry(manu_frame, width=20, textvariable=self.host)
-            host_box.pack()
+        self.host = tk.StringVar(value='127.0.0.1')
+        host_box = tk.Entry(manu_frame, width=20, textvariable=self.host)
+        host_box.pack()
 
         port_label = tk.Label(manu_frame, text="Sever's port:", justify=tk.RIGHT)
         port_label.pack(pady=10)
@@ -348,11 +250,13 @@ class TicTacToneGUI:
         port_box.pack()
 
         self.connect_button = tk.Button(manu_frame,
-                                        text='Connect to Sever' if self.selection.get() == self.is_client else 'Bond port',
+                                        text='Connect to Sever',
                                         command=lambda: self.connect_click())
         self.connect_button.pack(pady=20, ipadx=5, ipady=5)
 
-        self.start_button = tk.Button(manu_frame, text='Start Game', font=('Arial', 10),
+        self.start_button = tk.Button(manu_frame,
+                                      text='Start Game',
+                                      font=('Arial', 10),
                                       command=lambda: self.start_click())
         self.start_button.pack(pady=10, ipadx=10, ipady=10)
 
@@ -360,26 +264,7 @@ class TicTacToneGUI:
 
         manu_frame.pack(anchor=tk.CENTER, side=tk.LEFT)
 
-    def select_pack(self):
-        select_frame = tk.Frame(self.select_window)
-
-        self.select_window.title("Mode Selector")
-
-        label = tk.Label(select_frame, text="Sever OR Client?")
-        label.pack(padx=80)
-
-        server_button = tk.Radiobutton(select_frame, text="Sever", variable=self.selection, value=self.is_sever)
-        server_button.pack(padx=80, pady=5)
-
-        client_button = tk.Radiobutton(select_frame, text="Client", variable=self.selection, value=self.is_client)
-        client_button.pack(padx=80)
-
-        select_button = tk.Button(select_frame, text="OK", command=self.select_button_click)
-        select_button.pack(padx=80, pady=10)
-
-        select_frame.pack(anchor=tk.CENTER)
-
 
 if __name__ == '__main__':
-    game = TicTacToneGUI()
+    game = ClientGui()
     sys.exit()
