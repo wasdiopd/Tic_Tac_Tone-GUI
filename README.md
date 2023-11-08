@@ -1,41 +1,25 @@
-## 井字棋GUI界面
+# Tic-Tac-Toe GUI Game
 
-使用tkinter开发（比较简单，代码量少），使用时直接运行myGUI.py即可
+A simple Tic-Tac-Toe game with a graphical user interface (GUI) developed using the Tkinter library in Python. The game allows players to connect as either a server or a client to play against each other.
 
-其他文件是我的一些修改，还没有弄好。
+## Features
 
-未来可能使用pyqt5重新写一下，增加人机对战的功能。
+- Two gameplay modes: Server and Client
+- Server mode allows binding to a specific port for other players to connect
+- Client mode enables connecting to a server using the server's IP address and port
+- Responsive GUI with clear visual indicators for game state and current player turn
+- Game logic implemented with support for game restart and win/tie conditions
+- Threading used for handling server-client communication and gameplay synchronization
 
-感兴趣的朋友也可以自己尝试一下，接口在db_renji_qi.py中，我写好了使用minimax 的机器下棋，直接调用即可。
+## Prerequisites
 
-#### 功能介绍
+- Python 3.x
+- Tkinter library
+- Pillow (PIL) library
 
-模式选择：
+## How to Run
 
-<img src="photo/selector.png" align="left" style="zoom: 80%;" />
+Run the script `myGUI.py` to start the Tic-Tac-Toe game. The script provides a graphical interface for selecting the server or client mode and initiating the game.
 
-选择用户端或者服务器端，点击ok进入相应程序。
-
-服务器端：
-
-<img src="photo/server.png" style="zoom:80%;" align="left"/>
-
-输入绑定的端口号，点击绑定端口，等待客户端连接。
-
-客户端：
-
-<img src="photo/client.png" style="zoom:80%;" align="left"/>
-
-输入主机的ip地址和端口号，连接到服务器后开始游戏即可。
-
-
-
-##### 注：  
-
-游戏结束后再次点击开始游戏可以重置棋盘。
-
-如果想要打包成exe文件推荐使用虚拟打包，会极大缩小exe文件的大小。
-
-还有问题等待完善，但是电子信息的课tmd又多又难，等有时间再说。这算一个雏形，反正完成作业是绰绰有余了。
-
-和余俊老师上的这两节课是一点没离开井字棋呀哈哈哈:happy:
+```bash
+python myGUI.py
