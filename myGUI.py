@@ -312,9 +312,9 @@ class TicTacToneGUI:
     def board_pack(self):
         board_frame = tk.Frame(self.root)
 
-        self.board_image = ImageTk.PhotoImage(file='ban.jpg')
-        self.bai_image = ImageTk.PhotoImage(file='bai.jpg')
-        self.hei_image = ImageTk.PhotoImage(file='hei.jpg')
+        self.board_image = ImageTk.PhotoImage(file='photo/ban.jpg')
+        self.bai_image = ImageTk.PhotoImage(file='photo/bai.jpg')
+        self.hei_image = ImageTk.PhotoImage(file='photo/hei.jpg')
 
         width = self.board_image.width()
         height = self.board_image.height()
