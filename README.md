@@ -14,16 +14,20 @@
 
 > + 模式选择：  
 >
+>   
+>   
 >   <img src="photo/selector.png" align="left" style="zoom: 80%;" />  
 >
->   
+> 
 >
 >   选择用户端或者服务器端，点击ok进入相应程序。  
 >
->   
+> 
 >
 > + 服务器端：  
 >
+>   
+>   
 >   <img src="photo/server.png" style="zoom:80%;" align="left"/>    
 >
 > 
@@ -34,6 +38,8 @@
 >
 > + 客户端：  
 >
+> 	
+> 	
 > 	<img src="photo/client.png" style="zoom:80%;" align="left"/>  
 >
 > 
