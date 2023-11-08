@@ -6,6 +6,8 @@ from random import randint
 import threading
 from PIL import ImageTk
 import db_renji_qi as qi
+from server import ServerGui as server
+import client
 
 
 class TicTacToneGUI:
@@ -13,13 +15,12 @@ class TicTacToneGUI:
         """
         窗口初始化
         """
-        self.root = None
         self.select_window = tk.Tk()
         self.selection = tk.IntVar()
         """
         服务器还是客户端 以及ip和端口数据的存储
         """
-        self.is_sever = 1
+        self.is_server = 1
         self.is_client = 2
         self.host = None
         self.port = None
@@ -45,8 +46,8 @@ class TicTacToneGUI:
 
         self.game_state = threading.Event()
         self.game_state.set()
-        self.th_sever_send = None
-        self.th_sever_receive = None
+        self.th_server_send = None
+        self.th_server_receive = None
 
         self.th_client_send = None
         self.th_client_receive = None
@@ -63,9 +64,6 @@ class TicTacToneGUI:
         self.select_window.resizable(False, False)
 
         TicTacToneGUI.center_window(self.select_window)
-
-        # self.thread = threading.Thread(target=self.main_threading)  # 或者使用带超时时间的recv
-        # self.thread.start()
 
         self.select_window.mainloop()
 
@@ -159,20 +157,20 @@ class TicTacToneGUI:
 
         else:
             port = int(self.port.get())
-            self.creat_sever(port)
+            self.creat_server(port)
         self.connect_button['state'] = tk.DISABLED
         self.start_button['state'] = tk.NORMAL
 
     def start_click(self):
         if self.start_button_count == 0:
-            if self.selection.get() == self.is_sever:
-                self.th_sever_send = threading.Thread(target=self.sever_sending)
-                self.th_sever_receive = threading.Thread(target=self.sever_receiving)
-                self.th_sever_send.setDaemon(True)
-                self.th_sever_receive.setDaemon(True)
-                self.th_sever_send.start()
-                self.th_sever_receive.start()
-                self.who_go_first_sever()
+            if self.selection.get() == self.is_server:
+                self.th_server_send = threading.Thread(target=self.server_sending)
+                self.th_server_receive = threading.Thread(target=self.server_receiving)
+                self.th_server_send.setDaemon(True)
+                self.th_server_receive.setDaemon(True)
+                self.th_server_send.start()
+                self.th_server_receive.start()
+                self.who_go_first_server()
             else:
                 self.th_client_send = threading.Thread(target=self.client_sending)
                 self.th_client_receive = threading.Thread(target=self.client_receiving)
@@ -193,8 +191,8 @@ class TicTacToneGUI:
 
             self.game_state.set()
 
-            if self.selection.get() == self.is_sever:
-                self.who_go_first_sever()
+            if self.selection.get() == self.is_server:
+                self.who_go_first_server()
             else:
                 self.who_go_first_client()
         self.start_button_count += 1
@@ -203,7 +201,7 @@ class TicTacToneGUI:
     threading start
     """
 
-    def creat_sever(self, port):
+    def creat_server(self, port):
         """
         using IPV4 connection and UDP to communicate
         """
@@ -222,10 +220,10 @@ class TicTacToneGUI:
         # th_client_receive.start()
 
     """
-    communication between sever and client
+    communication between server and client
     """
 
-    def sever_receiving(self):
+    def server_receiving(self):
         while True:
             try:
                 data = self.connection.recv(1024).decode('utf-8')  # read next line on client socket
@@ -241,7 +239,7 @@ class TicTacToneGUI:
                 self.is_your_turn = True
                 self.chess_click(*data, True)
 
-    def sever_sending(self):
+    def server_sending(self):
         while True:
             if self.is_send_data:
                 position = str(self.position)
@@ -276,8 +274,8 @@ class TicTacToneGUI:
                 self.is_send_data = False
                 self.is_your_turn = False
 
-    def who_go_first_sever(self):
-        if self.selection.get() == self.is_sever:
+    def who_go_first_server(self):
+        if self.selection.get() == self.is_server:
             if not self.turn_flag:
                 self.turn = randint(1, 2)
                 self.connection.send(str((1 if self.turn == 2 else 2, 'ok')).encode('utf-8'))
@@ -368,7 +366,7 @@ class TicTacToneGUI:
         label = tk.Label(select_frame, text="Sever OR Client?")
         label.pack(padx=80)
 
-        server_button = tk.Radiobutton(select_frame, text="Sever", variable=self.selection, value=self.is_sever)
+        server_button = tk.Radiobutton(select_frame, text="Sever", variable=self.selection, value=self.is_server)
         server_button.pack(padx=80, pady=5)
 
         client_button = tk.Radiobutton(select_frame, text="Client", variable=self.selection, value=self.is_client)

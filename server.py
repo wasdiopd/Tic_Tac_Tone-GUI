@@ -8,7 +8,7 @@ from PIL import ImageTk
 import db_renji_qi as qi
 
 
-class SeverGui:
+class ServerGui:
     def __init__(self):
         """
         窗口初始化
@@ -41,8 +41,8 @@ class SeverGui:
 
         self.game_state = threading.Event()
         self.game_state.set()
-        self.th_sever_send = None
-        self.th_sever_receive = None
+        self.th_server_send = None
+        self.th_server_receive = None
 
         self.turn = None
 
@@ -51,15 +51,15 @@ class SeverGui:
         self.start_button = None
         self.start_button_count = 0
 
-        self.create_sever_gui()
+        self.create_server_gui()
 
-    def create_sever_gui(self):
+    def create_server_gui(self):
         self.root = tk.Tk()
         self.root.title('Tic_Tac_Toe')
         self.board_pack()
-        self.sever_manu_pack()
+        self.server_manu_pack()
         self.root.resizable(False, False)
-        SeverGui.center_window(self.root)
+        ServerGui.center_window(self.root)
         self.root.mainloop()
 
     @staticmethod
@@ -128,19 +128,19 @@ class SeverGui:
 
     def connect_click(self):
         port = int(self.port.get())
-        self.creat_sever(port)
+        self.creat_server(port)
         self.connect_button['state'] = tk.DISABLED
         self.start_button['state'] = tk.NORMAL
 
     def start_click(self):
         if self.start_button_count == 0:
-            self.th_sever_send = threading.Thread(target=self.sever_sending)
-            self.th_sever_receive = threading.Thread(target=self.sever_receiving)
-            self.th_sever_send.setDaemon(True)
-            self.th_sever_receive.setDaemon(True)
-            self.th_sever_send.start()
-            self.th_sever_receive.start()
-            self.who_go_first_sever()
+            self.th_server_send = threading.Thread(target=self.server_sending)
+            self.th_server_receive = threading.Thread(target=self.server_receiving)
+            self.th_server_send.setDaemon(True)
+            self.th_server_receive.setDaemon(True)
+            self.th_server_send.start()
+            self.th_server_receive.start()
+            self.who_go_first_server()
         else:
             if self.game_state.is_set():
                 tk.messagebox.showinfo(title='Warning', message="Current game is going on!")
@@ -152,7 +152,7 @@ class SeverGui:
                     self.buttons[i][j].config(image=self.board_image)
 
             self.game_state.set()
-            self.who_go_first_sever()
+            self.who_go_first_server()
 
         self.start_button_count += 1
 
@@ -160,7 +160,7 @@ class SeverGui:
     threading start
     """
 
-    def creat_sever(self, port):
+    def creat_server(self, port):
         """
         using IPV4 connection and UDP to communicate
         """
@@ -172,10 +172,10 @@ class SeverGui:
         print('Server connected by', self.address)
 
     """
-    communication between sever and client
+    communication between server and client
     """
 
-    def sever_receiving(self):
+    def server_receiving(self):
         while True:
             try:
                 data = self.connection.recv(1024).decode('utf-8')  # read next line on client socket
@@ -191,7 +191,7 @@ class SeverGui:
                 self.is_your_turn = True
                 self.chess_click(*data, True)
 
-    def sever_sending(self):
+    def server_sending(self):
         while True:
             if self.is_send_data:
                 position = str(self.position)
@@ -200,7 +200,7 @@ class SeverGui:
                 self.is_send_data = False
                 self.is_your_turn = False
 
-    def who_go_first_sever(self):
+    def who_go_first_server(self):
         if not self.turn_flag:
             self.turn = randint(1, 2)
             self.connection.send(str((1 if self.turn == 2 else 2, 'turn')).encode('utf-8'))
@@ -234,7 +234,7 @@ class SeverGui:
 
         board_frame.pack(anchor=tk.CENTER, side=tk.LEFT)
 
-    def sever_manu_pack(self):
+    def server_manu_pack(self):
         manu_frame = tk.Frame(self.root)
 
         port_label = tk.Label(manu_frame, text="Sever's port:", justify=tk.RIGHT)
@@ -264,7 +264,7 @@ class SeverGui:
         label = tk.Label(select_frame, text="Sever OR Client?")
         label.pack(padx=80)
 
-        server_button = tk.Radiobutton(select_frame, text="Sever", variable=self.selection, value=self.is_sever)
+        server_button = tk.Radiobutton(select_frame, text="Sever", variable=self.selection, value=self.is_server)
         server_button.pack(padx=80, pady=5)
 
         client_button = tk.Radiobutton(select_frame, text="Client", variable=self.selection, value=self.is_client)

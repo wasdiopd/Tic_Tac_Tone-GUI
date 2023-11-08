@@ -169,7 +169,7 @@ class ClientGui:
         self.connect_button.config(text='Connect Successfully!')
 
     """
-    communication between sever and client
+    communication between server and client
     """
 
     def client_receiving(self):
