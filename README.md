@@ -22,12 +22,16 @@
 >
 >   <img src="photo/server.png" style="zoom:80%;" align="left"/>    
 >
+>   
+>
 >   输入绑定的端口号，点击绑定端口，等待客户端连接。  
 >
 > + 客户端：  
 >
 > 	<img src="photo/client.png" style="zoom:80%;" align="left"/>  
 >
+> 	
+> 	
 > 	输入主机的ip地址和端口号，连接到服务器后开始游戏即可。  
 
 ##### 注：  
