@@ -10,41 +10,23 @@
 
 #### 功能介绍
 
-##### 模式选择
+模式选择：
 
-> + 模式选择：  
->
->   
->   
->   <img src="photo/selector.png" align="left" style="zoom: 80%;" />  
->
-> 
->
->   选择用户端或者服务器端，点击ok进入相应程序。  
->
-> 
->
-> + 服务器端：  
->
->   
->   
->   <img src="photo/server.png" style="zoom:80%;" align="left"/>    
->
-> 
->
->   输入绑定的端口号，点击绑定端口，等待客户端连接。  
->
-> 
->
-> + 客户端：  
->
-> 	
-> 	
-> 	<img src="photo/client.png" style="zoom:80%;" align="left"/>  
->
-> 
->
-> 输入主机的ip地址和端口号，连接到服务器后开始游戏即可。  
+<img src="photo/selector.png" align="left" style="zoom: 80%;" />
+
+选择用户端或者服务器端，点击ok进入相应程序。
+
+服务器端：
+
+<img src="photo/server.png" style="zoom:80%;" align="left"/>
+
+输入绑定的端口号，点击绑定端口，等待客户端连接。
+
+客户端：
+
+<img src="photo/client.png" style="zoom:80%;" align="left"/>
+
+输入主机的ip地址和端口号，连接到服务器后开始游戏即可。
 
 
 
